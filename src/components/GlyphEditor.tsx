@@ -8,22 +8,32 @@ interface GlyphEditorProps {
 
 const GlyphEditor = ({ letter, onChange, initialPixels }: GlyphEditorProps) => {
     const defaultGrid = Array(154).fill(false);
-    const [pixels, setPixels] = useState<boolean[]>(initialPixels || Array(154).fill(false));
+    const [pixels, setPixels] = useState<boolean[]>(initialPixels || defaultGrid);
+    const [isDrawing, setIsDrawing] = useState(false);
+    const [drawMode, setDrawMode] = useState<boolean | null>(null); // true = draw, false = erase
 
-    // Reset pixels when the letter or initialPixels changes
     useEffect(() => {
         const newPixels = initialPixels || defaultGrid;
         setPixels(newPixels);
     }, [letter, initialPixels]);
 
+    useEffect(() => {
+        const handleMouseUp = () => {
+            setIsDrawing(false);
+            setDrawMode(null);
+        };
+        window.addEventListener('mouseup', handleMouseUp);
+        return () => window.removeEventListener('mouseup', handleMouseUp);
+    }, []);
 
-
-    const togglePixel = (index: number) => {
+    const applyDrawMode = (index: number) => {
+        if (drawMode === null) return;
         const updated = [...pixels];
-        updated[index] = !updated[index];
+        updated[index] = drawMode;
         setPixels(updated);
         onChange(updated);
     };
+
 
     return (
         <div>
@@ -32,8 +42,18 @@ const GlyphEditor = ({ letter, onChange, initialPixels }: GlyphEditorProps) => {
                 {pixels.map((active, idx) => (
                     <div
                         key={idx}
-                        onClick={() => togglePixel(idx)}
-                        className={`w-4 h-4 border border-gray-300 ${active ? 'bg-black' : 'bg-white'}`}
+                        onMouseDown={() => {
+                            setIsDrawing(true);
+                            setDrawMode(!active);
+                            const updated = [...pixels];
+                            updated[idx] = !active;
+                            setPixels(updated);
+                            onChange(updated);
+                        }}
+                        onMouseEnter={() => {
+                            if (isDrawing) applyDrawMode(idx);
+                        }}
+                        className={`w-4 h-4 cursor-pointer ${active ? 'bg-black' : 'bg-white'}`}
                     ></div>
                 ))}
             </div>

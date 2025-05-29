@@ -14,9 +14,9 @@ const TypingArea = ({ glyphMap }: TypingAreaProps) => {
     const renderGlyph = (char: string, idx: number) => {
         const pixels = glyphMap[char] || glyphMap['?'];
         return (
-            <div key={idx} className="grid grid-cols-11 gap-px inline-grid mx-0.5">
+            <div key={idx} className="inline-grid grid-cols-11  mx-0.5">
                 {pixels.map((active, i) => (
-                    <div key={i} className={`w-2 h-2 ${active ? 'bg-black' : 'bg-white'}`}></div>
+                    <div key={i} className={`w-2 h-2 ${active ? 'bg-white' : 'bg-black'}`}></div>
                 ))}
             </div>
         );
